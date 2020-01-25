@@ -12,7 +12,6 @@ import (
 	"io"
 	"io/ioutil"
 	"math/big"
-	"net"
 	"time"
 )
 
@@ -60,9 +59,6 @@ func readCACertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, *ec
 func NewCA() ([]byte, []byte, error) {
 	// TODO add rsa support/option
 	// privKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -73,7 +69,6 @@ func NewCA() ([]byte, []byte, error) {
 		Subject: pkix.Name{
 			CommonName: "ssh.ca.name",
 		},
-		IPAddresses:           []net.IP{net.ParseIP("127.0.0.1")},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0), // valid for 10 years
 		IsCA:                  true,
