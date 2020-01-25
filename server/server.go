@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"log"
 	"net"
-	"time"
 )
 
 // Server implements an mTLS SSH server.
@@ -14,7 +13,6 @@ type Server struct {
 	tlsConfig *tls.Config
 	listener  net.Listener
 	handler   func(*tls.Conn)
-	shutdown  chan struct{}
 }
 
 // New implements a wrappeer to create a new Server,
@@ -36,8 +34,6 @@ func New(opts ...Option) (*Server, error) {
 	server.addr = serverOptions.Addr
 	server.tlsConfig = serverOptions.TLSConfig
 	server.handler = serverOptions.Handler
-
-	server.shutdown = make(chan struct{})
 
 	listener, err := tls.Listen("tcp", server.addr, server.tlsConfig)
 	if err != nil {
@@ -65,31 +61,23 @@ func (s *Server) Start() {
 	go func() {
 		log.Println("server: started")
 		for {
-			select {
-			case <-s.shutdown:
-				log.Println("server: stopping")
-				return
-			default:
-				conn, err := s.listener.Accept()
-				if err != nil {
-					log.Printf("failed to accept conn: %s", err)
-					time.Sleep(2 * time.Second)
-					break
-				}
-				log.Println("server: accepted connection")
-				tlsConn, ok := conn.(*tls.Conn)
-				if !ok {
-					log.Fatalf("failed to cast conn to tls.Conn")
-				}
-
-				log.Println("server: handling tls conn")
-				go s.HandleConn(tlsConn)
+			conn, err := s.listener.Accept()
+			if err != nil {
+				// log.Printf("failed to accept conn: %s", err)
+				break
 			}
+			log.Println("server: accepted connection")
+			tlsConn, ok := conn.(*tls.Conn)
+			if !ok {
+				log.Fatalf("failed to cast conn to tls.Conn")
+			}
+			log.Println("server: handling tls conn")
+			go s.HandleConn(tlsConn)
 		}
 	}()
 }
 
 // Shutdown stops the underlying accept loop.
-func (s *Server) Shutdown() net.Listener {
-	return s.listener
+func (s *Server) Shutdown() {
+	s.listener.Close()
 }
