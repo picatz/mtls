@@ -148,13 +148,12 @@ func WithInsecureVerfication() TLSConfigOption {
 	}
 }
 
-func BuildDefaultServerTLSConfig(caPemFile, serverCertFile, serverKeyFile string) *tls.Config {
+func BuildDefaultServerTLSConfig(caPemFile, serverCertPemFile, serverKeyPemFile string) *tls.Config {
 	config, _ := Build(
-
 		// used to verify the client cert is signed by the CA and is therefore valid
 		WithCAFile(caPemFile),
 		// server certificate which is validated by the client
-		WithX509KeyPair(serverCertFile, serverKeyFile),
+		WithX509KeyPair(serverCertPemFile, serverKeyPemFile),
 		// this requires a valid client certificate to be supplied during handshake
 		WithMutualAuthentication(),
 		WithMinVersion(tls.VersionTLS12),
@@ -182,10 +181,10 @@ func BuildDefaultServerTLSConfig(caPemFile, serverCertFile, serverKeyFile string
 	return config
 }
 
-func BuildDefaultClientTLSConfig(caPemFile, clientCertFile, clientKeyFile string) *tls.Config {
+func BuildDefaultClientTLSConfig(caPemFile, clientCertPemFile, clientKeyPemFile string) *tls.Config {
 	config, _ := Build(
 		WithRootCAFile(caPemFile),
-		WithX509KeyPair(clientCertFile, clientKeyFile),
+		WithX509KeyPair(clientCertPemFile, clientKeyPemFile),
 		WithInsecureVerfication(), // TODO fix
 	)
 
