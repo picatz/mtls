@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/picatz/mtls/cert"
 	"github.com/picatz/mtls/client"
@@ -136,8 +135,13 @@ func TestServerClient(t *testing.T) {
 
 	serverTLSConf.BuildNameToCertificate()
 
+	serverHandlerDoneForTest := make(chan struct{})
+
 	// Server hanlder
 	serverHandler := func(conn *tls.Conn) {
+		defer func() {
+			serverHandlerDoneForTest <- struct{}{}
+		}()
 		defer conn.Close()
 		defer log.Println("server: closing tls conn")
 
@@ -204,76 +208,10 @@ func TestServerClient(t *testing.T) {
 	}
 
 	// allow for server/client to complete jobs
-	time.Sleep(2 * time.Second)
+	<-serverHandlerDoneForTest
 
 	err = conn.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestServerClientWithTestFixtures(t *testing.T) {
-	var (
-		caPEMFile = "../test-fixtures/certs/ca.crt"
-
-		serverPEMFile        = "../test-fixtures/certs/server.name.crt"
-		serverPrivKeyPEMFile = "../test-fixtures/certs/server.name.key"
-
-		clientPEMFile        = "../test-fixtures/certs/client.name.crt"
-		clientPrivKeyPEMFile = "../test-fixtures/certs/client.name.key"
-	)
-
-	// Server Instance
-	s, err := New(
-		WithTLSConfig(
-			tlsconf.BuildDefaultServerTLSConfig(
-				caPEMFile,
-				serverPEMFile,
-				serverPrivKeyPEMFile,
-			),
-		),
-	)
-	if err != nil {
-		t.Fatal("new server:", err)
-	}
-	defer s.Listener().Close()
-
-	// Client Instance
-	c, err := client.New(
-		client.WithAddr("127.0.0.1:2222"),
-		client.WithTLSConfig(
-			tlsconf.BuildDefaultClientTLSConfig(
-				caPEMFile,
-				clientPEMFile,
-				clientPrivKeyPEMFile,
-			),
-		),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	conn, err := c.Dial()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// this is required to complete the handshake and populate the connection state
-	// we are doing this so we can print the peer certificates prior to reading / writing to the connection
-	err = conn.Handshake()
-	if err != nil {
-		t.Fatal("client handshake", err)
-	}
-
-	tag := fmt.Sprintf("[%s -> %s]", conn.LocalAddr(), conn.RemoteAddr())
-
-	if len(conn.ConnectionState().PeerCertificates) > 0 {
-		log.Printf("%s client common name: %+v", tag, conn.ConnectionState().PeerCertificates[0].Subject.CommonName)
-	}
-
-	err = conn.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(c)
 }
