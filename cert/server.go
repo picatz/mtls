@@ -6,7 +6,7 @@ import (
 
 func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) {
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
-	caCert, caPrivKey, err := readCertAndKey(caCertPEM, caPrivKeyPEM)
+	caCert, caPrivKey, err := ReadCertAndKey(caCertPEM, caPrivKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
