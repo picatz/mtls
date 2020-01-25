@@ -1,68 +1,20 @@
 package cert
 
 import (
-	"bytes"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/pem"
 	"io"
-	"math/big"
-	"time"
 )
 
 func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) {
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
-	caCert, caPrivKey, err := readCACertAndKey(caCertPEM, caPrivKeyPEM)
-
-	// TODO add rsa support/option
-	// privKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	caCert, caPrivKey, err := readCertAndKey(caCertPEM, caPrivKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			CommonName: "ssh.server.name",
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(10, 0, 0), // valid for 10 years
-		KeyUsage:              x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: true,
-	}
-
-	certBytes, err := x509.CreateCertificate(rand.Reader, cert, caCert, &privKey.PublicKey, caPrivKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	certPEMBuffer := new(bytes.Buffer)
-	err = pem.Encode(certPEMBuffer, &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	b, err := x509.MarshalECPrivateKey(privKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	privKeyPEMBuffer := new(bytes.Buffer)
-	err = pem.Encode(privKeyPEMBuffer, &pem.Block{
-		Type:  "EC PRIVATE KEY",
-		Bytes: b,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return certPEMBuffer.Bytes(), privKeyPEMBuffer.Bytes(), nil
+	return New(
+		WithParent(caCert, caPrivKey),
+		WithNewECDSAKey(),
+		IsServer(),
+		WithCommonName("ssh.server.name"),
+	)
 }
