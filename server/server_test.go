@@ -192,7 +192,7 @@ func TestServerClient(t *testing.T) {
 
 	// Client Instance
 	c, err := client.New(
-		client.WithAddr("127.0.0.1:2222"),
+		client.WithAddr(DefaultAddr),
 		client.WithTLSConfig(
 			clientTLSConfig,
 		),
