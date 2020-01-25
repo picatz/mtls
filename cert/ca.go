@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 )
 
-func saveCertAndKey(prefix string, caCertPEM, caPrivKeyPEM []byte) error {
+func SaveCertAndKey(prefix string, caCertPEM, caPrivKeyPEM []byte) error {
 	err := ioutil.WriteFile(prefix+".cert.pem", caCertPEM, 0644)
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func saveCertAndKey(prefix string, caCertPEM, caPrivKeyPEM []byte) error {
 	return nil
 }
 
-func readCertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, interface{}, error) {
+func ReadCertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, interface{}, error) {
 	// Decode CA cert from PEM encoded io.Reader bytes
 	var cert *x509.Certificate
 	caCertPEMBytes, err := ioutil.ReadAll(caCertPEM)
