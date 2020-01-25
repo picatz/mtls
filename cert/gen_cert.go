@@ -28,7 +28,7 @@ func baseCert() *x509.Certificate {
 	}
 }
 
-// New generates a PEM encoded x509 key and cert.
+// New generates a PEM encoded x509 cert and private key.
 func New(opts ...CertOption) ([]byte, []byte, error) {
 	cerOpts := &CertOptions{
 		key:  nil,
