@@ -10,7 +10,6 @@ import (
 	"encoding/pem"
 	"io"
 	"math/big"
-	"net"
 	"time"
 )
 
@@ -18,6 +17,8 @@ func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) 
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
 	caCert, caPrivKey, err := readCACertAndKey(caCertPEM, caPrivKeyPEM)
 
+	// TODO add rsa support/option
+	// privKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -28,7 +29,6 @@ func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) 
 		Subject: pkix.Name{
 			CommonName: "ssh.server.name",
 		},
-		IPAddresses:           []net.IP{net.ParseIP("127.0.0.1")},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0), // valid for 10 years
 		KeyUsage:              x509.KeyUsageDigitalSignature,
