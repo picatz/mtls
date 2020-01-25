@@ -14,7 +14,7 @@ import (
 )
 
 func writeToTempFile(prefix string, data []byte) (string, error) {
-	file, err := ioutil.TempFile("/tmp", "prefix")
+	file, err := ioutil.TempFile("/tmp", prefix)
 	if err != nil {
 		return "", err
 	}
