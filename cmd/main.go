@@ -9,5 +9,6 @@ func main() {
 	rootCmd.AddCommand(serverCommand)
 	rootCmd.AddCommand(clientCommand)
 	rootCmd.AddCommand(certCommand)
+	rootCmd.AddCommand(proxyCommand)
 	rootCmd.Execute()
 }
