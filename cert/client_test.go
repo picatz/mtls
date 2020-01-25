@@ -8,7 +8,10 @@ import (
 
 func TestNewClientFromCA(t *testing.T) {
 	// CA Key + Cert
-	caPEM, caPrivKeyPEM, err := NewCA()
+	caPEM, caPrivKeyPEM, err := NewCA(
+		WithNewECDSAKey(),
+		WithCommonName("ca"),
+	)
 
 	if err != nil {
 		t.Fatal(err)
@@ -18,7 +21,12 @@ func TestNewClientFromCA(t *testing.T) {
 	fmt.Println(string(caPrivKeyPEM))
 
 	// Client Key + Cert
-	clientPEM, clientPrivKeyPEM, err := NewClientFromCA(bytes.NewReader(caPrivKeyPEM), bytes.NewReader(caPEM))
+	clientPEM, clientPrivKeyPEM, err := NewClientFromCA(
+		bytes.NewReader(caPrivKeyPEM),
+		bytes.NewReader(caPEM),
+		WithNewECDSAKey(),
+		WithCommonName("client"),
+	)
 
 	if err != nil {
 		t.Fatal(err)

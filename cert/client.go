@@ -4,17 +4,14 @@ import (
 	"io"
 )
 
-func NewClientFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) {
+func NewClientFromCA(caPrivKeyPEM, caCertPEM io.Reader, opts ...CertOption) ([]byte, []byte, error) {
+	opts = append(opts, IsClient())
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
 	caCert, caPrivKey, err := ReadCertAndKey(caCertPEM, caPrivKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
+	opts = append(opts, WithParent(caCert, caPrivKey))
 
-	return New(
-		WithParent(caCert, caPrivKey),
-		WithNewECDSAKey(),
-		IsClient(),
-		WithCommonName("ssh.client.name"),
-	)
+	return New(opts...)
 }

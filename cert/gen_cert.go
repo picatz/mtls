@@ -54,7 +54,7 @@ func New(opts ...CertOption) ([]byte, []byte, error) {
 		pubKey = &k.PublicKey
 		privKey = k
 	default:
-		panic(fmt.Sprintf("%T not implemented", k))
+		panic(fmt.Sprintf("%T key type not implemented (probably missing)", k))
 	}
 
 	cert := cerOpts.cert

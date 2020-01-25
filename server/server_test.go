@@ -30,11 +30,10 @@ func writeToTempFile(prefix string, data []byte) (string, error) {
 }
 
 func TestNewServer(t *testing.T) {
-	caPEM, caPrivKeyPEM, err := cert.NewCA()
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	caPEM, caPrivKeyPEM, err := cert.NewCA(
+		cert.WithNewECDSAKey(),
+		cert.WithCommonName("ssh.ca.name"),
+	)
 
 	caPEMFile, err := writeToTempFile("caPEM", caPEM)
 	if err != nil {
@@ -46,7 +45,12 @@ func TestNewServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	serverPEM, serverPrivKeyPEM, err := cert.NewServerFromCA(bytes.NewReader(caPrivKeyPEM), bytes.NewReader(caPEM))
+	serverPEM, serverPrivKeyPEM, err := cert.NewServerFromCA(
+		bytes.NewReader(caPrivKeyPEM),
+		bytes.NewReader(caPEM),
+		cert.WithNewECDSAKey(),
+		cert.WithCommonName("server.name"),
+	)
 
 	if err != nil {
 		t.Fatal(err)
@@ -80,7 +84,10 @@ func TestNewServer(t *testing.T) {
 
 func TestServerClient(t *testing.T) {
 	// 1. Create new CA Key and Cert
-	caPEM, caPrivKeyPEM, err := cert.NewCA()
+	caPEM, caPrivKeyPEM, err := cert.NewCA(
+		cert.WithNewECDSAKey(),
+		cert.WithCommonName("ca"),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +98,12 @@ func TestServerClient(t *testing.T) {
 	}
 
 	// 2. Create new Server Key and Cert
-	serverPEM, serverPrivKeyPEM, err := cert.NewServerFromCA(bytes.NewReader(caPrivKeyPEM), bytes.NewReader(caPEM))
+	serverPEM, serverPrivKeyPEM, err := cert.NewServerFromCA(
+		bytes.NewReader(caPrivKeyPEM),
+		bytes.NewReader(caPEM),
+		cert.WithCommonName("server.name"),
+		cert.WithNewECDSAKey(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +119,12 @@ func TestServerClient(t *testing.T) {
 	}
 
 	// 3. Create new Client Key and Cert
-	clientPEM, clientPrivKeyPEM, err := cert.NewClientFromCA(bytes.NewReader(caPrivKeyPEM), bytes.NewReader(caPEM))
+	clientPEM, clientPrivKeyPEM, err := cert.NewClientFromCA(
+		bytes.NewReader(caPrivKeyPEM),
+		bytes.NewReader(caPEM),
+		cert.WithCommonName("client.name"),
+		cert.WithNewECDSAKey(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

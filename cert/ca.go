@@ -62,10 +62,9 @@ func ReadCertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, inter
 	return cert, key, nil
 }
 
-func NewCA() ([]byte, []byte, error) {
+func NewCA(opts ...CertOption) ([]byte, []byte, error) {
+	opts = append(opts, IsCA())
 	return New(
-		WithNewECDSAKey(),
-		IsCA(),
-		WithCommonName("ssh.ca.name"),
+		opts...,
 	)
 }

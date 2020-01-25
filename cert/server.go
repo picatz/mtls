@@ -4,17 +4,14 @@ import (
 	"io"
 )
 
-func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader) ([]byte, []byte, error) {
+func NewServerFromCA(caPrivKeyPEM, caCertPEM io.Reader, opts ...CertOption) ([]byte, []byte, error) {
+	opts = append(opts, IsServer())
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
 	caCert, caPrivKey, err := ReadCertAndKey(caCertPEM, caPrivKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
+	opts = append(opts, WithParent(caCert, caPrivKey))
 
-	return New(
-		WithParent(caCert, caPrivKey),
-		WithNewECDSAKey(),
-		IsServer(),
-		WithCommonName("ssh.server.name"),
-	)
+	return New(opts...)
 }
