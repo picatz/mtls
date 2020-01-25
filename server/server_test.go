@@ -90,11 +90,6 @@ func TestServerClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = writeToTempFile("caPrivKeyPEM", caPrivKeyPEM)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	// 2. Create new Server Key and Cert
 	serverPEM, serverPrivKeyPEM, err := cert.NewServerFromCA(bytes.NewReader(caPrivKeyPEM), bytes.NewReader(caPEM))
 	if err != nil {
