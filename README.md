@@ -1,11 +1,11 @@
 # mtls
 
-> 🔒 mTLS server and client library.
+> 🔒 [mTLS](https://en.wikipedia.org/wiki/Mutual_authentication) server and client library.
 
 ## Install
 
 ```console
-$ go get -u -v github.com/picatz/mtls
+$ go get -u -v github.com/picatz/mtls/...
 ...
 ```
 
