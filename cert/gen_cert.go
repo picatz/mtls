@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-func baseCert() *x509.Certificate {
+func baseCert() (*x509.Certificate, error) {
 	serialNumber, err := GenerateSerialNumber()
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to generate serial number for base cert: %w", err)
 	}
 
 	return &x509.Certificate{
@@ -25,14 +25,19 @@ func baseCert() *x509.Certificate {
 		ExtKeyUsage:           []x509.ExtKeyUsage{},          // ex: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		IsCA:                  false,
 		BasicConstraintsValid: true,
-	}
+	}, nil
 }
 
 // New generates a PEM encoded x509 cert and private key.
 func New(opts ...CertOption) ([]byte, []byte, error) {
+	bc, err := baseCert()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	cerOpts := &CertOptions{
 		key:  nil,
-		cert: baseCert(),
+		cert: bc,
 	}
 
 	for _, opt := range opts {
@@ -59,10 +64,8 @@ func New(opts ...CertOption) ([]byte, []byte, error) {
 
 	cert := cerOpts.cert
 
-	var (
-		certBytes []byte
-		err       error
-	)
+	var certBytes []byte
+
 	if cert.IsCA { // self sign
 		certBytes, err = x509.CreateCertificate(rand.Reader, cert, cert, pubKey, privKey)
 	} else { // sign with parent cert
