@@ -9,7 +9,6 @@ import (
 func TestNewClientFromCA(t *testing.T) {
 	// CA Key + Cert
 	caPEM, caPrivKeyPEM, err := NewCA(
-		WithNewECDSAKey(),
 		WithCommonName("ca"),
 	)
 
@@ -24,7 +23,6 @@ func TestNewClientFromCA(t *testing.T) {
 	clientPEM, clientPrivKeyPEM, err := NewClientFromCA(
 		bytes.NewReader(caPrivKeyPEM),
 		bytes.NewReader(caPEM),
-		WithNewECDSAKey(),
 		WithCommonName("client"),
 	)
 

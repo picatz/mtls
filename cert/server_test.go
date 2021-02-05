@@ -8,7 +8,6 @@ import (
 
 func TestNewServerFromCA(t *testing.T) {
 	caPEM, caPrivKeyPEM, err := NewCA(
-		WithNewECDSAKey(),
 		WithCommonName("server"),
 	)
 
@@ -23,7 +22,6 @@ func TestNewServerFromCA(t *testing.T) {
 	serverPEM, serverPrivKeyPEM, err := NewServerFromCA(
 		bytes.NewReader(caPrivKeyPEM),
 		bytes.NewReader(caPEM),
-		WithNewECDSAKey(),
 		WithCommonName("server"),
 	)
 

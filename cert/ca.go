@@ -63,7 +63,7 @@ func ReadCertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, inter
 }
 
 func NewCA(opts ...CertOption) ([]byte, []byte, error) {
-	opts = append(opts, IsCA())
+	opts = append(opts, IsCA(), WithNewECDSAKey())
 	return New(
 		opts...,
 	)
