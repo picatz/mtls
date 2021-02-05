@@ -183,10 +183,15 @@ func TestServerClient(t *testing.T) {
 	defer s.Shutdown()
 	s.Start()
 
-	clientTLSConfig := tlsconf.BuildDefaultClientTLSConfig(
+	clientTLSConfig := tlsconf.BuildClientTLSConfigWithCustomVerification(
 		caPEMFile,
 		clientPEMFile,
 		clientPrivKeyPEMFile,
+		tlsconf.VerifyPeerCertificateInsecureAny,
+		// tlsconf.VerifyFirstPeerCert(x509.VerifyOptions{
+		// 	DNSName:     "127.0.0.1",
+		// 	CurrentTime: time.Now(),
+		// }),
 	)
 
 	// Deprecated:

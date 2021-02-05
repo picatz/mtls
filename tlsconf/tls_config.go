@@ -148,6 +148,33 @@ func WithInsecureVerfication() TLSConfigOption {
 	}
 }
 
+type VerifyPeerCertificate = func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error
+
+func WithCustomPeerCertificateVerification(verifyFunc VerifyPeerCertificate) TLSConfigOption {
+	return func(config *tls.Config) error {
+		config.VerifyPeerCertificate = verifyFunc
+		return nil
+	}
+}
+
+func VerifyPeerCertificateForceFailure(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+	return fmt.Errorf("forced peer certificature failure")
+}
+
+func VerifyPeerCertificateInsecureAny(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+	return nil
+}
+
+func VerifyFirstPeerCert(opts x509.VerifyOptions) VerifyPeerCertificate {
+	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+		if len(verifiedChains) == 0 && len(verifiedChains[0]) == 0 {
+			return fmt.Errorf("failed to find first peer certificate in the verified chains")
+		}
+		_, err := verifiedChains[0][0].Verify(opts)
+		return err
+	}
+}
+
 func BuildDefaultServerTLSConfig(caPemFile, serverCertPemFile, serverKeyPemFile string) *tls.Config {
 	config, _ := Build(
 		// used to verify the client cert is signed by the CA and is therefore valid
@@ -185,7 +212,17 @@ func BuildDefaultClientTLSConfig(caPemFile, clientCertPemFile, clientKeyPemFile 
 	config, _ := Build(
 		WithRootCAFile(caPemFile),
 		WithX509KeyPair(clientCertPemFile, clientKeyPemFile),
-		WithInsecureVerfication(), // TODO fix
+	)
+
+	return config
+}
+
+func BuildClientTLSConfigWithCustomVerification(caPemFile, clientCertPemFile, clientKeyPemFile string, verifyFunc VerifyPeerCertificate) *tls.Config {
+	config, _ := Build(
+		WithRootCAFile(caPemFile),
+		WithX509KeyPair(clientCertPemFile, clientKeyPemFile),
+		WithInsecureVerfication(), // required to implement custom TLS certificate verification that doesn't require IP addresses
+		WithCustomPeerCertificateVerification(verifyFunc),
 	)
 
 	return config
