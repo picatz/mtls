@@ -27,7 +27,8 @@ func New(opts ...Option) (*Client, error) {
 	client.addr = clientOptions.Addr
 	client.tlsConfig = clientOptions.TLSConfig
 
-	client.tlsConfig.BuildNameToCertificate()
+	// Deprecated:
+	// client.tlsConfig.BuildNameToCertificate()
 
 	return client, nil
 }

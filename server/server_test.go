@@ -145,7 +145,8 @@ func TestServerClient(t *testing.T) {
 		serverPrivKeyPEMFile,
 	)
 
-	serverTLSConf.BuildNameToCertificate()
+	// Deprecated:
+	// serverTLSConf.BuildNameToCertificate()
 
 	serverHandlerDoneForTest := make(chan struct{})
 
@@ -188,7 +189,8 @@ func TestServerClient(t *testing.T) {
 		clientPrivKeyPEMFile,
 	)
 
-	clientTLSConfig.BuildNameToCertificate()
+	// Deprecated:
+	// clientTLSConfig.BuildNameToCertificate()
 
 	// Client Instance
 	c, err := client.New(
