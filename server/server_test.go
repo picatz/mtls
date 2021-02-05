@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -154,11 +155,12 @@ func TestServerClient(t *testing.T) {
 		caPEMFile,
 		clientPEMFile,
 		clientPrivKeyPEMFile,
-		tlsconf.VerifyPeerCertificateInsecureAny,
-		// tlsconf.VerifyFirstPeerCert(x509.VerifyOptions{
-		// 	DNSName:     "127.0.0.1",
-		// 	CurrentTime: time.Now(),
-		// }),
+		tlsconf.VerifyFirstPeerCertCustom(func(cert *x509.Certificate) error {
+			if cert.Subject.CommonName != "server.name" {
+				return fmt.Errorf("unexpected subject common name %q", cert.Subject.CommonName)
+			}
+			return nil
+		}),
 	)
 
 	// Deprecated:

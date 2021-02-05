@@ -167,11 +167,31 @@ func VerifyPeerCertificateInsecureAny(rawCerts [][]byte, verifiedChains [][]*x50
 
 func VerifyFirstPeerCert(opts x509.VerifyOptions) VerifyPeerCertificate {
 	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-		if len(verifiedChains) == 0 && len(verifiedChains[0]) == 0 {
+		if len(rawCerts) == 0 || len(rawCerts[0]) == 0 {
 			return fmt.Errorf("failed to find first peer certificate in the verified chains")
 		}
-		_, err := verifiedChains[0][0].Verify(opts)
+		cert, err := x509.ParseCertificate(rawCerts[0])
+		if err != nil {
+			return err
+		}
+		_, err = cert.Verify(opts)
 		return err
+	}
+}
+
+func VerifyFirstPeerCertCustom(certVertify func(cert *x509.Certificate) error) VerifyPeerCertificate {
+	return func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+		if len(rawCerts) == 0 || len(rawCerts[0]) == 0 {
+			return fmt.Errorf("failed to find first peer certificate in the verified chains")
+		}
+		if rawCerts[0] == nil {
+			return fmt.Errorf("first peer cert is nil")
+		}
+		cert, err := x509.ParseCertificate(rawCerts[0])
+		if err != nil {
+			return err
+		}
+		return certVertify(cert)
 	}
 }
 
