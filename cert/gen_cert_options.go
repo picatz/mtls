@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"time"
@@ -38,6 +39,17 @@ func WithKey(key interface{}) CertOption {
 func WithNewECDSAKey() CertOption {
 	return func(o *CertOptions) error {
 		privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		if err != nil {
+			return err
+		}
+		o.key = privKey
+		return nil
+	}
+}
+
+func WithNewRSAKey() CertOption {
+	return func(o *CertOptions) error {
+		privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 		if err != nil {
 			return err
 		}

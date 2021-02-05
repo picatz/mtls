@@ -5,13 +5,17 @@ import (
 )
 
 func NewClientFromCA(caPrivKeyPEM, caCertPEM io.Reader, opts ...CertOption) ([]byte, []byte, error) {
-	opts = append(opts, IsClient(), WithNewECDSAKey())
+	allOpts := []CertOption{}
+	allOpts = append(allOpts, WithNewECDSAKey())
+	allOpts = append(allOpts, opts...)
+	allOpts = append(allOpts, IsClient())
+
 	// Decode CA cert and private key from PEM encoded io.Reader bytes
 	caCert, caPrivKey, err := ReadCertAndKey(caCertPEM, caPrivKeyPEM)
 	if err != nil {
 		return nil, nil, err
 	}
-	opts = append(opts, WithParent(caCert, caPrivKey))
+	allOpts = append(allOpts, WithParent(caCert, caPrivKey))
 
-	return New(opts...)
+	return New(allOpts...)
 }

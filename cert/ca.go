@@ -63,8 +63,11 @@ func ReadCertAndKey(caCertPEM, caPrivKeyPEM io.Reader) (*x509.Certificate, inter
 }
 
 func NewCA(opts ...CertOption) ([]byte, []byte, error) {
-	opts = append(opts, IsCA(), WithNewECDSAKey())
+	// note: order matters to allow user supplied options to override defaults
+	allOpts := []CertOption{}
+	allOpts = append(allOpts, IsCA(), WithNewECDSAKey())
+	allOpts = append(allOpts, opts...)
 	return New(
-		opts...,
+		allOpts...,
 	)
 }
