@@ -7,5 +7,5 @@ func TestGenerateSerialNumber(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Fatal(n)
+	t.Log(n)
 }
