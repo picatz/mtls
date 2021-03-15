@@ -151,11 +151,20 @@ func TestServerClient(t *testing.T) {
 	defer s.Shutdown()
 	s.Start()
 
+	roots := x509.NewCertPool()
+	roots.AppendCertsFromPEM(caPEM)
+
+	verifyOpts := x509.VerifyOptions{
+		Roots: roots,
+	}
+
 	clientTLSConfig := tlsconf.BuildClientTLSConfigWithCustomVerification(
 		caPEMFile,
 		clientPEMFile,
 		clientPrivKeyPEMFile,
 		tlsconf.VerifyFirstPeerCertCustom(func(cert *x509.Certificate) error {
+			cert.Verify(verifyOpts)
+
 			if cert.Subject.CommonName != "server.name" {
 				return fmt.Errorf("unexpected subject common name %q", cert.Subject.CommonName)
 			}
