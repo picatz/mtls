@@ -6,9 +6,8 @@ import (
 	"net"
 )
 
-// Server implements an mTLS SSH server.
+// Server implements an mTLS server.
 type Server struct {
-	started   bool
 	addr      string
 	tlsConfig *tls.Config
 	listener  net.Listener
